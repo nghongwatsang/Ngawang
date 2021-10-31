@@ -1,0 +1,331 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+
+//possible things to add: avrTime, avrCost
+//special deals- boolean value possibly?
+//Try to personalize it more, and perhaps offer choice for a more advanced search
+//location- boolean
+//number of visits
+
+public class BusinessFinder {
+	int maxCap;
+	String location;
+	String name;
+	int count;
+	int visits;
+	int avrCost;
+	int avrTime;
+	boolean neighborhood;
+	boolean deals;
+	ArrayList<String> attributes;
+	
+	public BusinessFinder(String name, int maxCap, String location, ArrayList<String> attributes, int count, int visits, boolean neighborhood, boolean deals, int avrCost, int avrTime)
+	{
+		this.name = name;
+		this.maxCap = maxCap;
+		this.location = location;
+		this.attributes = attributes;
+		this.count = count;
+		this.visits = visits;
+		this.avrCost = avrCost;
+		this.neighborhood = neighborhood;
+		this.avrTime = avrTime;
+		this.deals = deals;
+		
+	}
+	
+	public static void main(String[] args) throws IOException{
+		// TODO Auto-generated method stub
+	
+		ArrayList<BusinessFinder> startBusiness = new ArrayList<BusinessFinder>();
+		makeBusinesses(startBusiness);
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in)); 
+		
+		System.out.println("State the number of people attending (can't be 0): ");
+		String people = in.readLine();
+		int numPeople = Integer.parseInt(people);
+		
+		while(numPeople < 1)
+		{
+			System.out.println("Invalid number, enter again: ");
+			people = in.readLine();
+			numPeople = Integer.parseInt(people);
+		}
+		
+		System.out.println("Enter a desired location: ");
+		String location = in.readLine();
+		
+		ArrayList<String> features = new ArrayList<String>();
+		System.out.println("Enter the things you want to do (type end to skip): ");
+	
+		while(true)
+		{
+			String feature = in.readLine();
+			if(feature.equals("end"))
+			{
+				break;
+			}
+			features.add(feature);
+			System.out.println("Enter more things you want to do (type end to stop): ");
+		}
+		
+		
+		ArrayList<BusinessFinder> finalBusiness = findMatch(startBusiness, location, numPeople, features);
+		
+		System.out.println();
+		System.out.println("Available businesses: ");
+		for(int n = 0; n < finalBusiness.size(); n++)
+		{
+			System.out.println(n + 1 + ") Name: " + finalBusiness.get(n).getName());
+			System.out.print("Attributes: ");
+			for(int k = 0; k < finalBusiness.get(n).getAttributes().size() - 1; k++)
+			{
+				System.out.print(finalBusiness.get(n).getAttributes().get(k) + ", ");
+			}
+			System.out.println(finalBusiness.get(n).getAttributes().get(finalBusiness.get(n).getAttributes().size() - 1) + ".");
+			System.out.println();
+				
+		}
+		
+		while(finalBusiness.size() > 0)
+		{
+			System.out.println("Pick a number to see more information (hit stop to close program): ");
+			String chooseBusiness = in.readLine();
+			if(chooseBusiness.equals("stop"))
+			{
+				break;
+			}
+			int numChoice = Integer.parseInt(chooseBusiness);
+			while(numChoice < 1 || numChoice > finalBusiness.size())
+			{
+				System.out.println("Invalid number, enter again: ");
+				chooseBusiness = in.readLine();
+				numChoice = Integer.parseInt(people);
+			}
+
+			
+			System.out.println();
+			System.out.println("Additional information: ");
+			finalBusiness.get(numChoice - 1).extraDetails();
+			System.out.println("Book location (type yes or no)?");
+			String go = in.readLine();
+		
+			if(go.equals("yes"))
+			{
+				System.out.println("Booked!");
+				finalBusiness.get(numChoice - 1).setCount(numPeople);
+			}
+			else
+			{
+				System.out.println("Okay, there are still other places out there!");
+			}
+			System.out.println();
+			System.out.println("Other places you may want to visit when you're in the neighborhood: ");
+			finalBusiness = findRemaining(finalBusiness, finalBusiness.get(numChoice - 1));
+			
+			for(int n = 0; n < finalBusiness.size(); n++)
+			{
+				System.out.println(n + 1 + ") Name: " + finalBusiness.get(n).getName());
+				System.out.print("Attributes: ");
+				for(int k = 0; k < finalBusiness.get(n).getAttributes().size() - 1; k++)
+				{
+					System.out.print(finalBusiness.get(n).getAttributes().get(k) + ", ");
+				}
+				System.out.println(finalBusiness.get(n).getAttributes().get(finalBusiness.get(n).getAttributes().size() - 1) + ".");
+				System.out.println();
+					
+			}
+		}
+			
+	}
+	public static ArrayList<BusinessFinder> makeBusinesses(ArrayList<BusinessFinder> business)
+	{
+		ArrayList<String> attributes = new ArrayList<String>();
+		attributes.add("retailer");
+		attributes.add("high-quality");
+		attributes.add("reviewer-approved");
+		attributes.add("vince sweaters");
+		
+		ArrayList<String> attributesOne = new ArrayList<String>();
+		attributesOne.add("market");
+		attributesOne.add("cheap");
+		attributesOne.add("assorted yogurts");
+		attributesOne.add("fresh seafood");
+		
+		ArrayList<String> attributesTwo = new ArrayList<String>();
+		attributesTwo.add("restaurant");
+		attributesTwo.add("popular");
+		
+		ArrayList<String> attributesThree = new ArrayList<String>();
+		attributesThree.add("restaurant");
+		attributesThree.add("pizza");
+		attributesThree.add("brick oven pizza");
+		attributesThree.add("lively");
+		
+		ArrayList<String> attributesFour = new ArrayList<String>();
+		attributesFour.add("fast food");
+		attributesFour.add("burgers");
+		attributesFour.add("fries");
+		attributesFour.add("lively");
+		
+		ArrayList<String> attributesFive = new ArrayList<String>();
+		attributesFive.add("bookstore");
+		attributesFive.add("Stamped");
+		
+		BusinessFinder businessOri = new BusinessFinder("Izower's", 20, "Long Island City", attributes, 0, 20, true, true, 60, 31);
+		BusinessFinder businessOne = new BusinessFinder("Duffy's Sweets", 10, "Bronx", attributesOne, 0, 30, true, true, 5, 12);
+		BusinessFinder businessTwo = new BusinessFinder("Xin Taste Hand Pulled Noodles", 5, "Forest Hills", attributesTwo, 0, 50, true, false, 20, 15);
+		BusinessFinder businessThree = new BusinessFinder("Nick's Pizza", 5, "Forest Hills", attributesThree, 0, 16, true, false, 36, 30);
+		BusinessFinder businessFour = new BusinessFinder("Forest Hill's Diner", 10, "Forest Hills", attributesFour, 9, 31, true, false, 20, 14);
+		BusinessFinder businessFive = new BusinessFinder("Xander's Bookstore", 12, "Long Island City", attributesFive, 5, 12, true, true, 8, 12);
+		
+		business.add(businessOri);
+		business.add(businessOne);
+		business.add(businessTwo);
+		business.add(businessThree);
+		business.add(businessFour);
+		business.add(businessFive);		
+		return business;
+
+	}
+	public static ArrayList<BusinessFinder> findMatch(ArrayList<BusinessFinder> business, String chooseLocation, int numPeople, ArrayList<String> chosenAttributes)
+	{
+		ArrayList<BusinessFinder> businessModOne = filterLocation(business, chooseLocation);
+		ArrayList<BusinessFinder> businessModTwo = eligible(businessModOne, numPeople);
+		if(chosenAttributes.size() > 0)
+		{
+			ArrayList<BusinessFinder>businessModThree = filterAttributes(businessModTwo, chosenAttributes);
+			return businessModThree;
+		}
+		else 
+		{
+			return businessModTwo;
+		}
+		
+	}
+	public static ArrayList<BusinessFinder> findRemaining(ArrayList<BusinessFinder> business, BusinessFinder original)
+	{
+		ArrayList<BusinessFinder> businessFinalOne = filterLocation(business, original.getLocation());
+		for(int i = 0; i < businessFinalOne.size(); i++)
+		{
+			if(businessFinalOne.get(i).getName().equals(original.getName()))
+			{
+				businessFinalOne.remove(i);
+				i--;
+			}
+		}
+		return businessFinalOne;
+		
+	}
+	
+	public static ArrayList<BusinessFinder> filterLocation(ArrayList<BusinessFinder> business, String chooseLocation)
+	{
+		ArrayList<BusinessFinder> narrowLocation = new ArrayList<BusinessFinder>();
+		for(int i = 0; i < business.size(); i++)
+		{
+			if(business.get(i).getLocation().equals(chooseLocation))
+			{
+				narrowLocation.add(business.get(i));
+			}
+		}
+		return narrowLocation;
+	}
+	
+	public static ArrayList<BusinessFinder> eligible(ArrayList<BusinessFinder> business, int numPeople)
+	{
+		ArrayList<BusinessFinder> underMax = new ArrayList<BusinessFinder>();
+		for(int i = 0; i < business.size(); i++)
+		{
+			if(business.get(i).getMaxCap() >= (business.get(i).getCount() + numPeople))
+			{
+				underMax.add(business.get(i));
+			}
+		}
+		return underMax;
+	}
+	
+	public static ArrayList<BusinessFinder> filterAttributes(ArrayList<BusinessFinder> business, ArrayList<String> attributes)
+	{
+		ArrayList<BusinessFinder> narrowAttribute = new ArrayList<BusinessFinder>();
+		for(int a = 0; a < attributes.size(); a++)
+		{
+			for(int b = 0; b < business.size(); b++)
+			{
+				for(int c = 0; c < business.get(b).getAttributes().size(); c++)
+				{
+					if(business.get(b).getAttributes().get(c).equals(attributes.get(a)))
+					{
+						narrowAttribute.add(business.get(b));
+					}
+				}
+			}
+		}
+		return narrowAttribute;
+	}
+	
+	public void extraDetails()
+	{
+		System.out.println("Average Time: " + avrTime);
+		System.out.println("Average Cost of Products: " + avrCost);
+		System.out.println("Number of past customers/vists: " + visits);
+		if(neighborhood)
+		{
+			System.out.println("The surrounding neighborhood is highly-rated and has many other small businesses.");
+		}
+		if(deals)
+		{
+			System.out.println("This business has available deals.");
+		}
+		System.out.println();
+	}
+	
+	public String getName()
+	{
+		return name;
+	}
+	public String getLocation()
+	{
+		return location;
+	}
+	public int getMaxCap()
+	{
+		return maxCap;
+	}
+	public int getCount()
+	{
+		return count;
+	}
+	public ArrayList<String> getAttributes()
+	{
+		return attributes;
+	}
+	
+	public void addCount(int num)
+	{
+		count += num;
+	}
+	
+	public void setName(String name)
+	{
+		this.name = name;
+	}
+	public void setLocation(String location)
+	{
+		this.location = location;
+	}
+	public void setMaxCap(int maxCap)
+	{
+		this.maxCap = maxCap;
+	}
+	public void setCount(int count)
+	{
+		this.count = count;
+	}
+	public void setAttributes(ArrayList<String> attributes)
+	{
+		this.attributes = attributes;
+	}
+	
+}
